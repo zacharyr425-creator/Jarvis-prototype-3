@@ -109,7 +109,7 @@
         .workspace {  
             flex: 1;  
             display: grid;  
-            grid-template-columns: 300px 1fr 300px;  
+            grid-template-columns: 320px 1fr 320px;  
             gap: 15px;  
             position: relative;  
             align-items: center;  
@@ -127,28 +127,68 @@
             display: block;  
             font-size: 0.85rem;  
             line-height: 1.5;  
-            transition: transform 0.1s ease-out, opacity 0.3s ease;  
-            touch-action: none; 
-            cursor: grab;
             position: relative;
             z-index: 5;
+            touch-action: none;
+            cursor: grab;
         }  
 
         .hud-panel:active {
             cursor: grabbing;
         }
 
-        .hud-panel h3 {  
-            font-family: 'Orbitron', sans-serif;  
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid rgba(0, 240, 255, 0.4);  
             margin-bottom: 12px;  
             padding-bottom: 6px;  
+        }
+
+        .hud-panel h3 {  
+            font-family: 'Orbitron', sans-serif;  
             font-size: 0.95rem;  
             color: #ffffff;  
             text-shadow: 0 0 8px #00f0ff;  
             text-transform: uppercase;  
             letter-spacing: 1px;
+            margin: 0;
         }  
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #00f0ff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            box-shadow: none;
+        }
+
+        .close-btn:hover {
+            color: #ff3366;
+            text-shadow: 0 0 8px #ff3366;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        /* VITALS AND DIAGNOSTICS */
+        .vital-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            padding: 6px;
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 2px solid #00f0ff;
+        }
+
+        .vital-value {
+            color: #ffffff;
+            font-weight: bold;
+        }
 
         /* ARC REACTOR LOGO DESIGN */  
         .logo-container {  
@@ -353,12 +393,18 @@
 
         <div id="workspace" class="workspace">  
             <div id="left-panel" class="hud-panel">  
-                <h3 id="left-title">SYSTEM MONITOR</h3>  
+                <div class="panel-header">
+                    <h3 id="left-title">SYSTEM & VITALS</h3>  
+                    <button class="close-btn" onclick="closePanel('left-panel')">✕</button>
+                </div>
                 <div id="left-content">  
-                    <p>• Core Status: Online</p>  
-                    <p>• Live Data Networks: Active</p>  
-                    <p>• News & Sports Feed: Ready</p>  
-                    <p>• Writer Module: Standing By</p>  
+                    <div class="vital-row"><span>CPU HEAT TEMP:</span> <span id="val-temp" class="vital-value">42°C</span></div>
+                    <div class="vital-row"><span>CORE LOAD:</span> <span id="val-load" class="vital-value">18%</span></div>
+                    <div class="vital-row"><span>COOLING FAN:</span> <span class="vital-value">2400 RPM</span></div>
+                    <div style="margin-top: 15px; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 4px; font-weight: bold;">USER BIOMETRIC VITALS</div>
+                    <div class="vital-row"><span>HEART RATE:</span> <span id="val-hr" class="vital-value">72 BPM</span></div>
+                    <div class="vital-row"><span>BLOOD OXYGEN (SpO2):</span> <span class="vital-value">99%</span></div>
+                    <div class="vital-row"><span>NEURAL FREQ:</span> <span class="vital-value">14.2 Hz</span></div>
                 </div>  
             </div>  
 
@@ -376,7 +422,10 @@
             </div>  
 
             <div id="right-panel" class="hud-panel">  
-                <h3 id="right-title">CALENDAR / SCHEDULE</h3>  
+                <div class="panel-header">
+                    <h3 id="right-title">CALENDAR / SCHEDULE</h3>  
+                    <button class="close-btn" onclick="closePanel('right-panel')">✕</button>
+                </div>
                 <div id="right-content">  
                     <ul id="calendarList" class="calendar-list">  
                         <li><span>Project Review</span> <span>10:00 AM</span></li>  
@@ -419,7 +468,7 @@
                 loader.style.opacity = '0';  
                 setTimeout(() => {  
                     loader.style.display = 'none';  
-                    speak("System online. All data networks and writing modules active, Sir.");  
+                    speak("System online. All data networks, vitals, and writing modules active, Sir.");  
                 }, 800);  
             }  
         }, 1500);  
@@ -427,6 +476,14 @@
         setInterval(() => {  
             const clock = document.getElementById('clock');  
             if (clock) clock.innerText = new Date().toLocaleTimeString();  
+            
+            // Random dynamic vitals effect
+            const tempVal = document.getElementById('val-temp');
+            const loadVal = document.getElementById('val-load');
+            const hrVal = document.getElementById('val-hr');
+            if (tempVal) tempVal.innerText = (40 + Math.floor(Math.random() * 5)) + "°C";
+            if (loadVal) loadVal.innerText = (15 + Math.floor(Math.random() * 20)) + "%";
+            if (hrVal) hrVal.innerText = (70 + Math.floor(Math.random() * 6)) + " BPM";
         }, 1000);  
 
         function speak(text) {  
@@ -459,6 +516,11 @@
             availableVoices = window.speechSynthesis.getVoices();  
         };  
 
+        function closePanel(panelId) {
+            document.getElementById(panelId).style.display = 'none';
+            speak("Panel closed, Sir.");
+        }
+
         async function processInput() {  
             const inputField = document.getElementById('userInput');  
             if (!inputField) return;  
@@ -468,8 +530,8 @@
             inputField.value = '';  
             const qLower = query.toLowerCase();  
 
-            // VOICE & SCREEN MOVEMENT COMMANDS
-            if (qLower.includes('move') || qLower.includes('shift') || qLower.includes('transfer') || qLower.includes('swap') || qLower.includes('switch')) {
+            // FIXED VOICE & SCREEN MOVEMENT COMMANDS
+            if (qLower.includes('move') || qLower.includes('shift') || qLower.includes('transfer') || qLower.includes('swap') || qLower.includes('switch') || qLower.includes('side')) {
                 if (qLower.includes('left')) {
                     moveContent('left');
                     return;
@@ -482,7 +544,7 @@
                 }
             }
 
-            // 1. WRITING MODULE (Write essays, emails, stories, fantasy football draft tips, etc.)
+            // 1. WRITING MODULE
             if (qLower.startsWith('write') || qLower.startsWith('draft') || qLower.startsWith('compose') || qLower.startsWith('create')) {
                 handleWritingRequest(query);
                 return;
@@ -518,12 +580,14 @@
                 return;  
             }  
 
-            // 5. ENCYCLOPEDIA / HISTORY SEARCH (Wikipedia / Britannica)
+            // 5. ENCYCLOPEDIA / HISTORY SEARCH
             await fetchKnowledge(query);
         }  
 
-        // Move Content Command Execution
+        // Move Content Execution Engine
         function moveContent(direction) {
+            showPanel('left');
+            showPanel('right');
             const rightTitle = document.getElementById('right-title').innerText;
             const rightContent = document.getElementById('right-content').innerHTML;
             const leftTitle = document.getElementById('left-title').innerText;
@@ -532,19 +596,21 @@
             if (direction === 'left') {
                 document.getElementById('left-title').innerText = rightTitle;
                 document.getElementById('left-content').innerHTML = rightContent;
-                document.getElementById('right-title').innerText = "SYSTEM MONITOR";
-                document.getElementById('right-content').innerHTML = "<p>• Standing by for system telemetry...</p>";
-                speak("Moving active screen data to the left display panel, Sir.");
+                document.getElementById('right-title').innerText = "SYSTEM & VITALS";
+                document.getElementById('right-content').innerHTML = leftContent;
+                speak("Shifting active telemetry to the left display panel, Sir.");
             } else if (direction === 'right') {
                 document.getElementById('right-title').innerText = leftTitle;
                 document.getElementById('right-content').innerHTML = leftContent;
                 document.getElementById('left-title').innerText = "SYSTEM MONITOR";
                 document.getElementById('left-content').innerHTML = "<p>• Core Status: Online</p><p>• Live Data Networks: Active</p>";
-                speak("Moving active screen data to the right display panel, Sir.");
+                speak("Shifting active telemetry to the right display panel, Sir.");
             }
         }
 
         function swapPanelContents() {
+            showPanel('left');
+            showPanel('right');
             const rightTitle = document.getElementById('right-title').innerText;
             const rightContent = document.getElementById('right-content').innerHTML;
             const leftTitle = document.getElementById('left-title').innerText;
@@ -565,7 +631,7 @@
             const rightTitle = document.getElementById('right-title');
             const rightContent = document.getElementById('right-content');
             
-            rightTitle.innerText = "WRITER: " + prompt.slice(0, 20).toUpperCase() + "...";
+            rightTitle.innerText = "WRITER: " + prompt.slice(0, 18).toUpperCase() + "...";
             
             let generatedText = "";
             const topic = prompt.replace(/(write|draft|compose|create)\s*(a|an)?\s*/i, '').trim();
@@ -661,8 +727,8 @@
         }
 
         function showPanel(panelId) {  
-            if (panelId === 'left') document.getElementById('left-panel').style.display = 'block';  
-            if (panelId === 'right') document.getElementById('right-panel').style.display = 'block';  
+            const p = document.getElementById(panelId === 'left' ? 'left-panel' : 'right-panel');
+            if (p) p.style.display = 'block';  
         }  
 
         function addCalendarItem(text) {  
@@ -698,40 +764,60 @@
             };  
         }  
 
-        // TOUCH & MOUSE DRAG ENGINE FOR PANELS
-        function makeDraggable(element) {
-            let posX = 0, posY = 0, initialX = 0, initialY = 0;
+        // UNIVERSAL DRAG ENGINE FOR TOUCH & MOUSE
+        function enableDrag(element) {
+            let isDragging = false;
+            let currentX, currentY, initialX, initialY;
+            let xOffset = 0, yOffset = 0;
 
-            element.addEventListener('pointerdown', dragStart);
+            element.addEventListener("touchstart", dragStart, false);
+            element.addEventListener("touchend", dragEnd, false);
+            element.addEventListener("touchmove", drag, false);
+
+            element.addEventListener("mousedown", dragStart, false);
+            element.addEventListener("mouseup", dragEnd, false);
+            element.addEventListener("mousemove", drag, false);
 
             function dragStart(e) {
-                // Prevent dragging when selecting input or text content inside panel
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-                
-                e.preventDefault();
-                initialX = e.clientX - posX;
-                initialY = e.clientY - posY;
 
-                document.addEventListener('pointermove', drag);
-                document.addEventListener('pointerup', dragEnd);
-            }
-
-            function drag(e) {
-                posX = e.clientX - initialX;
-                posY = e.clientY - initialY;
-                element.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+                if (e.type === "touchstart") {
+                    initialX = e.touches[0].clientX - xOffset;
+                    initialY = e.touches[0].clientY - yOffset;
+                } else {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+                isDragging = true;
             }
 
             function dragEnd() {
-                document.removeEventListener('pointermove', drag);
-                document.removeEventListener('pointerup', dragEnd);
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    if (e.type === "touchmove") {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    element.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                }
             }
         }
 
-        // Apply drag engine to both panels
         window.addEventListener('DOMContentLoaded', () => {
-            makeDraggable(document.getElementById('left-panel'));
-            makeDraggable(document.getElementById('right-panel'));
+            enableDrag(document.getElementById('left-panel'));
+            enableDrag(document.getElementById('right-panel'));
         });
     </script>  
 </body>  
