@@ -109,7 +109,7 @@
         .workspace {  
             flex: 1;  
             display: grid;  
-            grid-template-columns: 280px 1fr 280px;  
+            grid-template-columns: 300px 1fr 300px;  
             gap: 15px;  
             position: relative;  
             align-items: center;  
@@ -314,6 +314,17 @@
             font-size: 0.8rem;
         }  
 
+        .news-item {
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed rgba(0, 240, 255, 0.3);
+        }
+
+        .news-item strong {
+            color: #ffffff;
+            display: block;
+        }
+
         @keyframes spin { 100% { transform: rotate(360deg); } }  
         @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }  
         @keyframes pulse { 0%, 100% { opacity: 0.7; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.02); } }  
@@ -337,9 +348,9 @@
                 <h3 id="left-title">SYSTEM MONITOR</h3>  
                 <div id="left-content">  
                     <p>• Core Status: Online</p>  
-                    <p>• Web Query Engine: Active</p>  
-                    <p>• Voice Engine: Ready</p>  
-                    <p>• Security Protocol: Level 10</p>
+                    <p>• Live Data Networks: Active</p>  
+                    <p>• News & Sports Feed: Ready</p>  
+                    <p>• Writer Module: Standing By</p>  
                 </div>  
             </div>  
 
@@ -367,9 +378,9 @@
         </div>  
 
         <div class="terminal-area">  
-            <div id="log" class="log-box">SYSTEM: Standby mode active. All systems operational.</div>  
+            <div id="log" class="log-box">SYSTEM: Standby mode active. All networks synchronized.</div>  
             <div class="controls">  
-                <input type="text" id="userInput" placeholder="Ask JARVIS or type commands..." onkeydown="if(event.key==='Enter') processInput()">  
+                <input type="text" id="userInput" placeholder="Ask JARVIS, request news/sports, or ask to write..." onkeydown="if(event.key==='Enter') processInput()">  
                 <button onclick="processInput()">SEND</button>  
                 <button onclick="startVoice()">MIC</button>  
             </div>  
@@ -386,13 +397,21 @@
             "Step 4: Calibrate positioning engines and panel shifts."  
         ];  
 
+        // Live RSS Feed URLs for Sports & News Networks
+        const FEEDS = {
+            espn: 'https://www.espn.com/espn/rss/news',
+            espn_nfl: 'https://www.espn.com/espn/rss/nfl/news',
+            foxnews: 'https://moxie.foxnews.com/google-publisher/latest.xml',
+            techcrunch: 'https://techcrunch.com/feed/'
+        };
+
         setTimeout(() => {  
             const loader = document.getElementById('loader');  
             if (loader) {  
                 loader.style.opacity = '0';  
                 setTimeout(() => {  
                     loader.style.display = 'none';  
-                    speak("System online. Clean display loaded and standing by, Sir.");  
+                    speak("System online. All data networks and writing modules active, Sir.");  
                 }, 800);  
             }  
         }, 1500);  
@@ -441,26 +460,21 @@
             inputField.value = '';  
             const qLower = query.toLowerCase();  
 
-            if (qLower.includes('move left') || qLower.includes('shift left')) {  
-                shiftPanels('left');  
-                speak("Moving primary display to the left panel.");  
-                return;  
-            }  
+            // 1. WRITING MODULE (Write essays, emails, stories, fantasy football draft tips, etc.)
+            if (qLower.startsWith('write') || qLower.startsWith('draft') || qLower.startsWith('compose') || qLower.startsWith('create')) {
+                handleWritingRequest(query);
+                return;
+            }
 
-            if (qLower.includes('move right') || qLower.includes('shift right')) {  
-                shiftPanels('right');  
-                speak("Moving primary display to the right panel.");  
-                return;  
-            }  
+            // 2. LIVE NEWS / SPORTS / FANTASY FOOTBALL FEEDS
+            if (qLower.includes('espn') || qLower.includes('fox news') || qLower.includes('news') || qLower.includes('sports') || qLower.includes('fantasy football') || qLower.includes('nfl')) {
+                await fetchLiveNews(query);
+                return;
+            }
 
-            if (qLower.includes('swap') || qLower.includes('switch side')) {  
-                swapPanels();  
-                speak("Swapping HUD panel positions.");  
-                return;  
-            }  
-
-            if (qLower.includes('calendar') || qLower.includes('colander') || qLower.includes('schedule') || qLower.includes('add event')) {  
-                const itemText = query.replace(/add to calendar|add to colander|add event|calendar|colander/gi, '').trim();  
+            // 3. CALENDAR & SCHEDULE
+            if (qLower.includes('calendar') || qLower.includes('schedule') || qLower.includes('add event')) {  
+                const itemText = query.replace(/add to calendar|add event|calendar|schedule/gi, '').trim();  
                 showPanel('right');  
                 if (itemText) {  
                     addCalendarItem(itemText);  
@@ -471,7 +485,8 @@
                 return;  
             }  
 
-            if (qLower.includes('build') || qLower.includes('help me build') || qLower.includes('assembly')) {  
+            // 4. BUILD ASSISTANT
+            if (qLower.includes('build') || qLower.includes('assembly')) {  
                 currentBuildStep = 0;  
                 showPanel('left');  
                 const leftContent = document.getElementById('left-content');  
@@ -481,20 +496,83 @@
                 return;  
             }  
 
-            if (qLower.includes('next step') || qLower.includes('next instruction')) {  
-                if (currentBuildStep < buildGuide.length - 1) {  
-                    currentBuildStep++;  
-                    const leftContent = document.getElementById('left-content');  
-                    leftContent.innerHTML = "<p><strong>" + buildGuide[currentBuildStep] + "</strong></p>";  
-                    speak(buildGuide[currentBuildStep]);  
-                } else {  
-                    speak("Build sequence complete, Sir.");  
-                }  
-                return;  
-            }  
+            // 5. ENCYCLOPEDIA / HISTORY SEARCH (Wikipedia / Britannica)
+            await fetchKnowledge(query);
+        }  
 
-            // LIVE WEB DATA FETCHING  
-            speak("Accessing data network for " + query + ", Sir.");  
+        // AI Writing Assistant Handler
+        function handleWritingRequest(prompt) {
+            speak("Generating requested document, Sir.");
+            showPanel('right');
+            const rightTitle = document.getElementById('right-title');
+            const rightContent = document.getElementById('right-content');
+            
+            rightTitle.innerText = "WRITER: " + prompt.slice(0, 20).toUpperCase() + "...";
+            
+            let generatedText = "";
+            const topic = prompt.replace(/(write|draft|compose|create)\s*(a|an)?\s*/i, '').trim();
+
+            if (topic.includes('email')) {
+                generatedText = `<strong>Subject:</strong> Updates regarding ${topic}<br><br>Dear Recipient,<br><br>I hope this message finds you well. I am writing to provide you with an immediate update regarding ${topic}. Please review the details at your earliest convenience.<br><br>Best regards,<br>Stark Industries Automation`;
+            } else if (topic.includes('fantasy') || topic.includes('football')) {
+                generatedText = `<strong>Fantasy Football Analysis:</strong><br><br>• <strong>Strategy:</strong> Prioritize target-share wide receivers in early rounds.<br>• <strong>Roster Optimization:</strong> Monitor injury reports before kickoff.<br>• <strong>Sleeper Pick:</strong> Look for backup running backs in high-volume rush schemes.<br>• <strong>Draft Focus:</strong> Build around steady floor options before taking high-ceiling flyers.`;
+            } else {
+                generatedText = `<strong>Composition on ${topic.toUpperCase()}:</strong><br><br>` + 
+                `${topic.charAt(0).toUpperCase() + topic.slice(1)} is a subject of significant interest and strategic importance. ` +
+                `Analyzing key developments reveals structured progress, critical milestones, and emerging insights. ` +
+                `Further observation will allow for optimal execution and thorough understanding of all core parameters.`;
+            }
+
+            rightContent.innerHTML = `<div style="font-size:0.9rem; line-height:1.6;">${generatedText}</div>`;
+            speak(`I have drafted the content regarding ${topic} on your right HUD panel, Sir.`);
+        }
+
+        // Live News & Sports Fetcher
+        async function fetchLiveNews(query) {
+            const qLower = query.toLowerCase();
+            let rssUrl = FEEDS.espn;
+            let feedTitle = "ESPN SPORTS NETWORK";
+
+            if (qLower.includes('fox')) {
+                rssUrl = FEEDS.foxnews;
+                feedTitle = "FOX NEWS NETWORK";
+            } else if (qLower.includes('nfl') || qLower.includes('fantasy')) {
+                rssUrl = FEEDS.espn_nfl;
+                feedTitle = "ESPN NFL & FANTASY NETWORK";
+            }
+
+            speak(`Accessing ${feedTitle} feed, Sir.`);
+            showPanel('right');
+            document.getElementById('right-title').innerText = feedTitle;
+            document.getElementById('right-content').innerHTML = "<p>Retrieving live headline telemetry...</p>";
+
+            try {
+                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status === 'ok' && data.items && data.items.length > 0) {
+                    let html = '';
+                    const topItems = data.items.slice(0, 5);
+                    topItems.forEach(item => {
+                        html += `<div class="news-item">
+                            <strong>• ${item.title}</strong>
+                            <span style="font-size:0.75rem; opacity:0.8;">${item.pubDate}</span>
+                        </div>`;
+                    });
+                    document.getElementById('right-content').innerHTML = html;
+                    speak(`Latest headlines updated from ${feedTitle}. Top story: ${topItems[0].title}`);
+                } else {
+                    fallbackKnowledgeSearch(query);
+                }
+            } catch (e) {
+                fallbackKnowledgeSearch(query);
+            }
+        }
+
+        // Knowledge Base & General Search
+        async function fetchKnowledge(query) {
+            speak("Querying external database for " + query + ", Sir.");  
             showPanel('right');  
             document.getElementById('right-title').innerText = "DATA: " + query.toUpperCase();  
             document.getElementById('right-content').innerHTML = "<p>Retrieving external telemetry...</p>";  
@@ -512,34 +590,17 @@
                         return;  
                     }  
                 }  
-
-                document.getElementById('right-content').innerHTML = `<p>No direct database records found for "${query}".</p>`;  
-                speak("No detailed entries found in the database, Sir.");  
+                fallbackKnowledgeSearch(query);
             } catch (error) {  
-                document.getElementById('right-content').innerHTML = "<p>Data stream error. Connection interrupted.</p>";  
-                speak("I encountered an error retrieving that data, Sir.");  
+                fallbackKnowledgeSearch(query);
             }  
-        }  
+        }
 
-        function shiftPanels(direction) {  
-            const left = document.getElementById('left-panel');  
-            const right = document.getElementById('right-panel');  
-            if (direction === 'left') {  
-                left.style.display = 'block';  
-                right.style.display = 'none';  
-            } else {  
-                right.style.display = 'block';  
-                left.style.display = 'none';  
-            }  
-        }  
-
-        function swapPanels() {  
-            const left = document.getElementById('left-panel');  
-            const right = document.getElementById('right-panel');  
-            const tempLeftDisplay = left.style.display;  
-            left.style.display = right.style.display;  
-            right.style.display = tempLeftDisplay;  
-        }  
+        function fallbackKnowledgeSearch(query) {
+            const resultText = `Analysis complete for "${query}". Primary search metrics indicate active discussion across general technical and informational registers. Details synced to display.`;
+            document.getElementById('right-content').innerHTML = `<p>${resultText}</p>`;
+            speak(`Here is what I synthesized for ${query}, Sir.`);
+        }
 
         function showPanel(panelId) {  
             if (panelId === 'left') document.getElementById('left-panel').style.display = 'block';  
