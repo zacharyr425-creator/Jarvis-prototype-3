@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>J.A.R.V.I.S. Core Interface v4.0</title>
+    <title>J.A.R.V.I.S. Core Interface v6.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -16,7 +16,7 @@
         html, body {
             width: 100%;
             height: 100%;
-            background-color: #030a16;
+            background-color: #020813;
             color: #00f0ff;
             font-family: 'Share Tech Mono', monospace;
             overflow: hidden;
@@ -24,16 +24,19 @@
             flex-direction: column;
         }
 
+        /* CRT Overlay Effect */
         body::before {
             content: " ";
             position: absolute;
             inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(0, 240, 255, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 100, 255, 0.03));
             z-index: 10;
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
         }
 
+        /* Startup Loader */
         #loader {
             position: fixed;
             inset: 0;
@@ -65,13 +68,14 @@
             animation: pulse 1.5s infinite;
         }
 
+        /* HUD Container */
         #hud-container {
             flex: 1;
             width: 100vw;
             height: 100vh;
             border: 1px solid rgba(0, 240, 255, 0.3);
             box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.15);
-            background: rgba(4, 18, 38, 0.6);
+            background: rgba(4, 18, 38, 0.7);
             backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
@@ -84,7 +88,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(0, 240, 255, 0.4);
-            padding-bottom: 5px;
+            padding-bottom: 6px;
             height: 35px;
         }
 
@@ -98,97 +102,88 @@
         .workspace {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 10px;
+            grid-template-columns: 1fr 240px 1fr;
+            gap: 12px;
             position: relative;
             align-items: stretch;
             overflow: hidden;
-            transition: all 0.4s ease;
         }
 
         .side-column {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             overflow-y: auto;
             max-height: 100%;
-            border: 1px dashed rgba(0, 240, 255, 0.2);
-            padding: 8px;
+            border: 1px dashed rgba(0, 240, 255, 0.25);
+            padding: 10px;
             border-radius: 6px;
-            transition: background 0.2s;
+            background: rgba(0, 240, 255, 0.02);
+            transition: background 0.2s, border-color 0.2s;
         }
 
         .side-column.drag-over {
             background: rgba(0, 240, 255, 0.15);
-            border-style: solid;
+            border: 1px solid #00f0ff;
         }
 
+        /* Movable HUD Panels */
         .hud-panel {
             background: rgba(0, 240, 255, 0.08);
             border: 1px solid #00f0ff;
             padding: 12px;
             border-radius: 6px;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
             font-size: 0.85rem;
             line-height: 1.4;
             flex-shrink: 0;
+            cursor: grab;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .hud-panel:active {
+            cursor: grabbing;
         }
 
         .hud-panel h3 {
             font-family: 'Orbitron', sans-serif;
             border-bottom: 1px solid rgba(0, 240, 255, 0.4);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             padding-bottom: 4px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #ffffff;
             text-shadow: 0 0 8px #00f0ff;
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .calendar-frame {
-            width: 100%;
-            height: 250px;
-            border: 1px solid rgba(0, 240, 255, 0.4);
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.3);
+        /* Movement Control Buttons */
+        .panel-controls {
+            display: flex;
+            gap: 4px;
         }
 
-        .news-card {
-            background: rgba(0, 240, 255, 0.05);
-            border-left: 3px solid #00f0ff;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 0 4px 4px 0;
-            cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .news-card:active {
-            cursor: grabbing;
-            transform: scale(0.98);
-        }
-
-        .news-card strong {
-            color: #ffffff;
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.88rem;
-        }
-
-        .news-card p {
-            color: #b0efff;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-        }
-
-        .news-card a {
+        .move-btn {
+            background: rgba(0, 240, 255, 0.2);
+            border: 1px solid #00f0ff;
             color: #00f0ff;
-            text-decoration: underline;
-            font-size: 0.75rem;
-            font-weight: bold;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: 'Orbitron', sans-serif;
+            transition: background 0.2s;
         }
 
-        .arc-container {
+        .move-btn:hover {
+            background: #00f0ff;
+            color: #000;
+        }
+
+        /* CENTER HUD LOGO (EXACT IMAGE RECREATION) */
+        .hud-center-container {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -196,32 +191,65 @@
             padding: 10px;
         }
 
-        .arc-reactor {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 2px dashed #00f0ff;
+        .hud-logo-svg {
+            width: 210px;
+            height: 210px;
+            filter: drop-shadow(0 0 10px #00f0ff);
+        }
+
+        .svg-rotate-cw {
+            transform-origin: center;
+            animation: spin 30s linear infinite;
+        }
+
+        .svg-rotate-ccw {
+            transform-origin: center;
+            animation: spin-reverse 20s linear infinite;
+        }
+
+        .svg-pulse-hex {
+            transform-origin: center;
+            animation: pulse-scale 3s ease-in-out infinite;
+        }
+
+        /* Calendar Widget Styling */
+        .calendar-input-group {
             display: flex;
-            justify-content: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .calendar-list {
+            list-style: none;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .calendar-list li {
+            background: rgba(0, 240, 255, 0.06);
+            padding: 6px 8px;
+            border-left: 3px solid #00f0ff;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            animation: spin 20s linear infinite;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+            border-radius: 0 4px 4px 0;
         }
 
-        .arc-core {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ffffff 0%, #00f0ff 60%, rgba(0,240,255,0) 100%);
-            box-shadow: 0 0 30px #00f0ff;
-            animation: pulse 2s ease-in-out infinite;
+        .delete-event {
+            color: #ff4d4d;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 6px;
         }
 
+        /* Instructions & Terminal Area */
         .terminal-area {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            height: 90px;
+            height: 100px;
         }
 
         .log-box {
@@ -230,10 +258,10 @@
             color: #7df9ff;
             font-size: 0.85rem;
             text-shadow: 0 0 5px #00f0ff;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
             border-radius: 4px;
-            border: 1px solid rgba(0, 240, 255, 0.2);
+            border: 1px solid rgba(0, 240, 255, 0.25);
         }
 
         .controls {
@@ -248,16 +276,16 @@
             color: #00f0ff;
             padding: 10px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             outline: none;
             border-radius: 4px;
         }
 
-        button {
+        button.action-btn {
             background: rgba(0, 240, 255, 0.25);
             border: 1px solid #00f0ff;
             color: #00f0ff;
-            padding: 10px 14px;
+            padding: 10px 16px;
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
@@ -265,12 +293,14 @@
             transition: all 0.2s;
         }
 
-        button:active {
+        button.action-btn:hover {
             background: #00f0ff;
             color: #000;
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes pulse-scale { 0%, 100% { transform: scale(0.96); opacity: 0.8; } 50% { transform: scale(1.04); opacity: 1; } }
         @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
@@ -278,7 +308,7 @@
 
     <div id="loader">
         <div class="loader-ring"></div>
-        <div class="loader-text">INITIALIZING STARK HUD v4.0...</div>
+        <div class="loader-text">INITIALIZING STARK HUD v6.0...</div>
     </div>
 
     <div id="hud-container">
@@ -289,34 +319,94 @@
 
         <div id="workspace" class="workspace">
             <div id="left-column" class="side-column" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'left-column')">
-                <div class="hud-panel">
-                    <h3>SYSTEM STATUS</h3>
+                
+                <div class="hud-panel" id="panel-status" draggable="true" ondragstart="handleDragStart(event)">
+                    <h3>
+                        <span>SYSTEM DIAGNOSTICS</span>
+                        <div class="panel-controls">
+                            <button class="move-btn" onclick="movePanel('panel-status', 'right-column')">Move Right ➔</button>
+                        </div>
+                    </h3>
                     <p>• Core Engine: Active</p>
-                    <p>• Neural Link: Operational</p>
-                    <p>• Satellite Uplink: Connected</p>
+                    <p>• Interface Mode: Dynamic Docking</p>
+                    <p>• Voice Module: Deep British Male</p>
+                    <p>• Builder Assistant: Ready</p>
                 </div>
+
+                <div class="hud-panel" id="panel-calendar" draggable="true" ondragstart="handleDragStart(event)">
+                    <h3>
+                        <span>CALENDAR WIDGET</span>
+                        <div class="panel-controls">
+                            <button class="move-btn" onclick="movePanel('panel-calendar', 'right-column')">Move Right ➔</button>
+                        </div>
+                    </h3>
+                    <div class="calendar-input-group">
+                        <input type="text" id="eventInput" placeholder="New entry (e.g., Build Desk @ 3PM)...">
+                        <button class="action-btn" style="padding: 4px 8px; font-size:0.75rem;" onclick="addCalendarEvent()">+ ADD</button>
+                    </div>
+                    <ul class="calendar-list" id="calendarList">
+                        <li><span>• Initialized Jarvis HUD system</span><span class="delete-event" onclick="removeEvent(this)">✕</span></li>
+                    </ul>
+                </div>
+
             </div>
 
-            <div class="arc-container">
-                <div class="arc-reactor">
-                    <div class="arc-core"></div>
-                </div>
+            <div class="hud-center-container">
+                <svg class="hud-logo-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 30,50 L 30,30 L 50,30" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
+                    <path d="M 170,50 L 170,30 L 150,30" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
+                    <path d="M 30,150 L 30,170 L 50,170" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
+                    <path d="M 170,150 L 170,170 L 150,170" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
+
+                    <g class="svg-rotate-cw">
+                        <circle cx="100" cy="100" r="75" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="4, 12, 20, 8" fill="none" opacity="0.8"/>
+                        <circle cx="100" cy="100" r="82" stroke="#00f0ff" stroke-width="2" stroke-dasharray="2, 40" fill="none"/>
+                    </g>
+
+                    <g class="svg-rotate-ccw">
+                        <circle cx="100" cy="100" r="62" stroke="#00f0ff" stroke-width="2" stroke-dasharray="15, 8, 4, 8" fill="none" opacity="0.9"/>
+                        <circle cx="100" cy="100" r="54" stroke="#00f0ff" stroke-width="1" stroke-dasharray="2, 6" fill="none" opacity="0.5"/>
+                    </g>
+
+                    <circle cx="100" cy="20" r="2" fill="#00f0ff"/>
+                    <circle cx="100" cy="180" r="2" fill="#00f0ff"/>
+                    <circle cx="20" cy="100" r="2" fill="#00f0ff"/>
+                    <circle cx="180" cy="100" r="2" fill="#00f0ff"/>
+
+                    <g class="svg-pulse-hex">
+                        <polygon points="100,60 135,80 135,120 100,140 65,120 65,80" fill="rgba(0, 80, 255, 0.45)" stroke="#00f0ff" stroke-width="2.5"/>
+                        <polygon points="100,68 128,84 128,116 100,132 72,116 72,84" fill="none" stroke="rgba(0, 240, 255, 0.6)" stroke-width="1"/>
+                        <line x1="100" y1="92" x2="100" y2="108" stroke="#00f0ff" stroke-width="1.5"/>
+                        <line x1="92" y1="100" x2="108" y2="100" stroke="#00f0ff" stroke-width="1.5"/>
+                        <circle cx="100" cy="100" r="2" fill="#ffffff"/>
+                    </g>
+                </svg>
             </div>
 
             <div id="right-column" class="side-column" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'right-column')">
-                <div class="hud-panel">
-                    <h3>TELEMETRY STREAM</h3>
-                    <div>Awaiting input query...</div>
+                
+                <div class="hud-panel" id="panel-builder" draggable="true" ondragstart="handleDragStart(event)">
+                    <h3>
+                        <span>BUILD ASSISTANT</span>
+                        <div class="panel-controls">
+                            <button class="move-btn" onclick="movePanel('panel-builder', 'left-column')">⬅ Move Left</button>
+                        </div>
+                    </h3>
+                    <p style="color: #b0efff; margin-bottom: 6px;">Ask Jarvis to help build anything (e.g. <em>"build gaming pc"</em> or <em>"build bookshelf"</em>):</p>
+                    <div id="buildInstructions" style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px solid rgba(0,240,255,0.2);">
+                        <p>• Awaiting build request...</p>
+                    </div>
                 </div>
+
             </div>
         </div>
 
         <div class="terminal-area">
             <div id="log" class="log-box">SYSTEM: Online and awaiting directives...</div>
             <div class="controls">
-                <input type="text" id="userInput" placeholder="Ask JARVIS (e.g. 'open sports on left', 'show calendar')..." onkeydown="if(event.key==='Enter') processInput()">
-                <button onclick="processInput()">SEND</button>
-                <button onclick="startVoice()">MIC</button>
+                <input type="text" id="userInput" placeholder="Type command (e.g. 'build PC', 'add event Meeting', 'move calendar right')..." onkeydown="if(event.key==='Enter') processInput()">
+                <button class="action-btn" onclick="processInput()">SEND</button>
+                <button class="action-btn" onclick="startVoice()">MIC</button>
             </div>
         </div>
     </div>
@@ -324,35 +414,54 @@
     <script>
         let availableVoices = [];
 
+        // Voice Synthesizer Initializer
+        function loadVoices() {
+            if ('speechSynthesis' in window) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+        }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices();
+        }
+
+        // Hide Loader on Start
         setTimeout(() => {
             const loader = document.getElementById('loader');
             if (loader) {
                 loader.style.opacity = '0';
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    speak("System online. At your service, Sir.");
+                    speak("System online and fully operational, Sir. How may I assist you today?");
                 }, 500);
             }
-        }, 2000);
+        }, 1500);
 
+        // Clock Update
         setInterval(() => {
             const clock = document.getElementById('clock');
             if (clock) clock.innerText = new Date().toLocaleTimeString();
         }, 1000);
 
+        // Requirement 5: Deep British Male Voice
         function speak(text) {
             try {
                 if (!('speechSynthesis' in window)) return;
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.pitch = 0.95;
-                utterance.rate = 1.0;
+                
+                // Deep pitch and natural speech timing
+                utterance.pitch = 0.70; 
+                utterance.rate = 0.92;
 
                 const voices = availableVoices.length ? availableVoices : window.speechSynthesis.getVoices();
+                
+                // Prioritize Deep British Male Voice profiles
                 const preferredVoice = voices.find(v => 
                     v.name.includes('Google UK English Male') || 
-                    v.name.includes('Natural') || 
-                    (v.lang.includes('en-GB') && v.name.includes('Male')) ||
+                    v.name.includes('George') ||
+                    v.name.includes('Oliver') ||
+                    (v.lang.includes('en-GB') && v.name.toLowerCase().includes('male')) ||
                     v.name.includes('Daniel')
                 ) || voices.find(v => v.lang.includes('en-GB')) || voices[0];
 
@@ -364,9 +473,108 @@
             if (log) log.innerText = "JARVIS: " + text;
         }
 
+        // Requirement 1: Move panels left & right with buttons + drag support
+        function movePanel(panelId, targetColumnId) {
+            const panel = document.getElementById(panelId);
+            const targetCol = document.getElementById(targetColumnId);
+            if (panel && targetCol) {
+                targetCol.appendChild(panel);
+                const isLeft = targetColumnId.includes('left');
+                
+                // Update Button Label and Action
+                const btn = panel.querySelector('.move-btn');
+                if (btn) {
+                    btn.innerText = isLeft ? 'Move Right ➔' : '⬅ Move Left';
+                    btn.onclick = () => movePanel(panelId, isLeft ? 'right-column' : 'left-column');
+                }
+                speak(`Moved panel to the ${isLeft ? 'left' : 'right'} dock, Sir.`);
+            }
+        }
+
+        // Requirement 3: Add/Remove items from Calendar
+        function addCalendarEvent(customText) {
+            const input = document.getElementById('eventInput');
+            const text = customText || (input ? input.value.trim() : '');
+            if (!text) return;
+
+            const list = document.getElementById('calendarList');
+            const li = document.createElement('li');
+            li.innerHTML = `<span>• ${text}</span><span class="delete-event" onclick="removeEvent(this)">✕</span>`;
+            list.appendChild(li);
+
+            if (input && !customText) input.value = '';
+            speak(`Added ${text} to your calendar, Sir.`);
+        }
+
+        function removeEvent(element) {
+            const item = element.parentElement;
+            if (item) item.remove();
+            speak("Entry removed from calendar, Sir.");
+        }
+
+        // Requirement 4: Builder Assistant
+        function generateBuildPlan(item) {
+            const container = document.getElementById('buildInstructions');
+            const steps = [
+                `Phase 1: Design blueprints & assemble core components for ${item}.`,
+                `Phase 2: Secure structural framework and load essential dependencies.`,
+                `Phase 3: Connect power telemetry & configure control modules.`,
+                `Phase 4: Run initial diagnostic tests and verify system output.`
+            ];
+
+            container.innerHTML = `
+                <strong style="color:#ffffff;">Project Plan: ${item.toUpperCase()}</strong>
+                ${steps.map(s => `<p style="margin-top:6px; font-size:0.8rem;">${s}</p>`).join('')}
+            `;
+
+            speak(`I have rendered the step-by-step construction plan for ${item}, Sir.`);
+        }
+
+        // Input Terminal Command Handler
+        function processInput() {
+            const inputField = document.getElementById('userInput');
+            if (!inputField) return;
+            const query = inputField.value.trim();
+            if (!query) return;
+
+            inputField.value = '';
+            const qLower = query.toLowerCase();
+
+            // Calendar commands
+            if (qLower.startsWith('add event') || qLower.startsWith('add to calendar')) {
+                const eventText = query.replace(/add event|add to calendar/gi, '').trim();
+                addCalendarEvent(eventText);
+                return;
+            }
+
+            // Build commands
+            if (qLower.startsWith('build') || qLower.startsWith('how to make')) {
+                const item = query.replace(/build|how to make/gi, '').trim();
+                generateBuildPlan(item || 'your project');
+                return;
+            }
+
+            // Layout movement commands
+            if (qLower.includes('move calendar right') || qLower.includes('calendar to right')) {
+                movePanel('panel-calendar', 'right-column');
+                return;
+            } else if (qLower.includes('move calendar left') || qLower.includes('calendar to left')) {
+                movePanel('panel-calendar', 'left-column');
+                return;
+            } else if (qLower.includes('move status right')) {
+                movePanel('panel-status', 'right-column');
+                return;
+            } else if (qLower.includes('move status left')) {
+                movePanel('panel-status', 'left-column');
+                return;
+            }
+
+            speak("Directive received. Processing telemetry for " + query + ", Sir.");
+        }
+
         // Drag and Drop Logic
         function handleDragStart(event) {
-            event.dataTransfer.setData("text/plain", event.target.id);
+            event.dataTransfer.setData("text/plain", event.currentTarget.id);
         }
 
         function handleDragOver(event) {
@@ -382,163 +590,20 @@
             event.preventDefault();
             const targetCol = document.getElementById(columnId);
             targetCol.classList.remove('drag-over');
-            const cardId = event.dataTransfer.getData("text/plain");
-            const draggedCard = document.getElementById(cardId);
             
-            if (draggedCard) {
-                targetCol.prepend(draggedCard);
-                speak("Reassigned telemetry node to " + (columnId.includes('left') ? 'left' : 'right') + " dock, Sir.");
+            const panelId = event.dataTransfer.getData("text/plain");
+            const draggedPanel = document.getElementById(panelId);
+            
+            if (draggedPanel) {
+                movePanel(panelId, columnId);
             }
         }
 
-        async function processInput() {
-            const inputField = document.getElementById('userInput');
-            if (!inputField) return;
-            const query = inputField.value.trim();
-            if (!query) return;
-
-            inputField.value = '';
-            const qLower = query.toLowerCase();
-
-            // Clear layout
-            if (qLower.includes('clear') || qLower.includes('close')) {
-                document.getElementById('left-column').innerHTML = '';
-                document.getElementById('right-column').innerHTML = '';
-                speak("Clearing active HUD windows.");
-                return;
-            }
-
-            // Calendar command
-            if (qLower.includes('calendar') || qLower.includes('schedule')) {
-                showCalendar();
-                return;
-            }
-
-            // Determine Target Side (Left vs Right)
-            let side = 'right'; // default side
-            let searchTerm = query;
-
-            if (qLower.includes('on the left') || qLower.includes('on left')) {
-                side = 'left';
-                searchTerm = query.replace(/on the left|on left/gi, '').replace(/open|show|search/gi, '').trim();
-            } else if (qLower.includes('on the right') || qLower.includes('on right')) {
-                side = 'right';
-                searchTerm = query.replace(/on the right|on right/gi, '').replace(/open|show|search/gi, '').trim();
-            } else {
-                searchTerm = query.replace(/open|show|search/gi, '').trim();
-            }
-
-            speak("Accessing telemetry stream for " + searchTerm + ", Sir.");
-            await fetchAndRenderData(searchTerm, side);
-        }
-
-        function showCalendar() {
-            const targetCol = document.getElementById('left-column');
-            
-            const panel = document.createElement('div');
-            panel.className = 'hud-panel';
-            panel.innerHTML = `
-                <h3>FAMILY CALENDAR</h3>
-                <p style="margin-bottom:10px; color:#7df9ff;">[Calendar Uplink Ready - Paste Google Calendar embed URL when available]</p>
-                <div class="calendar-frame" style="display:flex; align-items:center; justify-content:center;">
-                    <span style="opacity:0.6;">📅 CALENDAR PLACEHOLDER</span>
-                </div>
-            `;
-            
-            targetCol.prepend(panel);
-            speak("Displaying family calendar on your main dock, Sir.");
-        }
-
-        async function fetchAndRenderData(term, side) {
-            const targetCol = document.getElementById(side + '-column');
-            
-            const newPanel = document.createElement('div');
-            newPanel.className = 'hud-panel';
-            newPanel.innerHTML = '<h3>SEARCHING: ' + term.toUpperCase() + '</h3><p>Connecting to global satellite feeds...</p>';
-            targetCol.prepend(newPanel);
-
-            const qLower = term.toLowerCase();
-
-            // 1. ESPN Football Sports Feed
-            if (qLower.includes('nfl') || qLower.includes('football') || qLower.includes('sports') || qLower.includes('espn')) {
-                try {
-                    const espnRes = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/news');
-                    if (espnRes.ok) {
-                        const espnData = await espnRes.json();
-                        if (espnData.articles && espnData.articles.length > 0) {
-                            renderArticles(newPanel, "NFL TELEMETRY (" + term.toUpperCase() + ")", espnData.articles.slice(0, 4).map(a => ({
-                                title: a.headline,
-                                desc: a.description || 'Live coverage update from ESPN.',
-                                link: (a.links && a.links.web) ? a.links.web.href : '#'
-                            })));
-                            speak("NFL telemetry updated with 4 data nodes, Sir.");
-                            return;
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            // 2. Wikipedia Multi-Article Search API
-            try {
-                const searchRes = await fetch('https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(term) + '&limit=4&namespace=0&format=json&origin=*');
-                if (searchRes.ok) {
-                    const searchData = await searchRes.json();
-                    const titles = searchData[1];
-                    const links = searchData[3];
-
-                    if (titles && titles.length > 0) {
-                        const articles = [];
-                        
-                        for (let i = 0; i < titles.length; i++) {
-                            try {
-                                const summaryRes = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(titles[i]));
-                                if (summaryRes.ok) {
-                                    const summaryData = await summaryRes.json();
-                                    articles.push({
-                                        title: summaryData.title,
-                                        desc: summaryData.extract ? (summaryData.extract.length > 120 ? summaryData.extract.substring(0, 120) + '...' : summaryData.extract) : 'No detail extract available.',
-                                        link: links[i] || '#'
-                                    });
-                                }
-                            } catch (err) {}
-                        }
-
-                        if (articles.length > 0) {
-                            renderArticles(newPanel, "TELEMETRY: " + term.toUpperCase(), articles);
-                            speak("Retrieved " + articles.length + " telemetry feeds for " + term + ", Sir.");
-                            return;
-                        }
-                    }
-                }
-            } catch (e) {}
-
-            // 3. Fallback
-            newPanel.innerHTML = 
-                '<h3>TELEMETRY: ' + term.toUpperCase() + '</h3>' +
-                '<p>• Query Processed: "' + term + '"</p>' +
-                '<p>• Analysis complete. Opening web search link...</p>' +
-                '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(term) + '" target="_blank" style="color:#00f0ff; font-weight:bold;">LAUNCH WEB SEARCH ➔</a>';
-            
-            speak("Telemetry analyzed for " + term + ", Sir.");
-        }
-
-        function renderArticles(container, title, items) {
-            let html = '<h3>' + title + '</h3>';
-            items.forEach((item, index) => {
-                const cardId = 'card-' + Date.now() + '-' + index;
-                html += '<div class="news-card" id="' + cardId + '" draggable="true" ondragstart="handleDragStart(event)">' +
-                            '<strong>' + item.title + '</strong>' +
-                            '<p>' + item.desc + '</p>' +
-                            '<a href="' + item.link + '" target="_blank">READ ARTICLE ➔</a>' +
-                        '</div>';
-            });
-            container.innerHTML = html;
-        }
-
+        // Voice Input Functionality
         function startVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Speech recognition is not supported in this browser.");
+                alert("Speech recognition is not supported on this browser.");
                 return;
             }
 
@@ -546,8 +611,7 @@
             recognition.lang = 'en-US';
             recognition.start();
 
-            const log = document.getElementById('log');
-            if (log) log.innerText = "SYSTEM: Listening...";
+            document.getElementById('log').innerText = "SYSTEM: Audio receiver online. Listening...";
 
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
@@ -556,7 +620,7 @@
             };
 
             recognition.onerror = () => {
-                speak("I didn't catch that, Sir.");
+                speak("I didn't catch that, Sir. Please try again.");
             };
         }
     </script>
