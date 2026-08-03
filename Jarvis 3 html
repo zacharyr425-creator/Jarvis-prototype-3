@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>J.A.R.V.I.S. Core Interface v4.0</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #030a16;
+            color: #00f0ff;
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: " ";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            background-color: #02060e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            transition: opacity 0.8s ease;
+        }
+
+        .loader-ring {
+            width: 90px;
+            height: 90px;
+            border: 3px solid transparent;
+            border-top: 3px solid #00f0ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px #00f0ff;
+        }
+
+        .loader-text {
+            margin-top: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px #00f0ff;
+            animation: pulse 1.5s infinite;
+        }
+
+        #hud-container {
+            flex: 1;
+            width: 100vw;
+            height: 100vh;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.15);
+            background: rgba(4, 18, 38, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.4);
+            padding-bottom: 5px;
+            height: 35px;
+        }
+
+        .system-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00f0ff;
+        }
+
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            position: relative;
+            align-items: stretch;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 100%;
+            border: 1px dashed rgba(0, 240, 255, 0.2);
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .side-column.drag-over {
+            background: rgba(0, 240, 255, 0.15);
+            border-style: solid;
+        }
+
+        .hud-panel {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid #00f0ff;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            flex-shrink: 0;
+        }
+
+        .hud-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.4);
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            font-size: 0.9rem;
+            color: #ffffff;
+            text-shadow: 0 0 8px #00f0ff;
+            text-transform: uppercase;
+        }
+
+        .calendar-frame {
+            width: 100%;
+            height: 250px;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .news-card {
+            background: rgba(0, 240, 255, 0.05);
+            border-left: 3px solid #00f0ff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 0 4px 4px 0;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .news-card:active {
+            cursor: grabbing;
+            transform: scale(0.98);
+        }
+
+        .news-card strong {
+            color: #ffffff;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.88rem;
+        }
+
+        .news-card p {
+            color: #b0efff;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .news-card a {
+            color: #00f0ff;
+            text-decoration: underline;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .arc-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            grid-column: 2;
+            padding: 10px;
+        }
+
+        .arc-reactor {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 2px dashed #00f0ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: spin 20s linear infinite;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        .arc-core {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #00f0ff 60%, rgba(0,240,255,0) 100%);
+            box-shadow: 0 0 30px #00f0ff;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .terminal-area {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            height: 90px;
+        }
+
+        .log-box {
+            flex: 1;
+            overflow-y: auto;
+            color: #7df9ff;
+            font-size: 0.85rem;
+            text-shadow: 0 0 5px #00f0ff;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid #00f0ff;
+            color: #00f0ff;
+            padding: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            border-radius: 4px;
+        }
+
+        button {
+            background: rgba(0, 240, 255, 0.25);
+            border: 1px solid #00f0ff;
+            color: #00f0ff;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        button:active {
+            background: #00f0ff;
+            color: #000;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">INITIALIZING STARK HUD v4.0...</div>
+    </div>
+
+    <div id="hud-container">
+        <header>
+            <div class="system-title">J.A.R.V.I.S.</div>
+            <div id="clock">00:00:00</div>
+        </header>
+
+        <div id="workspace" class="workspace">
+            <div id="left-column" class="side-column" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'left-column')">
+                <div class="hud-panel">
+                    <h3>SYSTEM STATUS</h3>
+                    <p>• Core Engine: Active</p>
+                    <p>• Neural Link: Operational</p>
+                    <p>• Satellite Uplink: Connected</p>
+                </div>
+            </div>
+
+            <div class="arc-container">
+                <div class="arc-reactor">
+                    <div class="arc-core"></div>
+                </div>
+            </div>
+
+            <div id="right-column" class="side-column" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'right-column')">
+                <div class="hud-panel">
+                    <h3>TELEMETRY STREAM</h3>
+                    <div>Awaiting input query...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-area">
+            <div id="log" class="log-box">SYSTEM: Online and awaiting directives...</div>
+            <div class="controls">
+                <input type="text" id="userInput" placeholder="Ask JARVIS (e.g. 'open sports on left', 'show calendar')..." onkeydown="if(event.key==='Enter') processInput()">
+                <button onclick="processInput()">SEND</button>
+                <button onclick="startVoice()">MIC</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let availableVoices = [];
+
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    speak("System online. At your service, Sir.");
+                }, 500);
+            }
+        }, 2000);
+
+        setInterval(() => {
+            const clock = document.getElementById('clock');
+            if (clock) clock.innerText = new Date().toLocaleTimeString();
+        }, 1000);
+
+        function speak(text) {
+            try {
+                if (!('speechSynthesis' in window)) return;
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.pitch = 0.95;
+                utterance.rate = 1.0;
+
+                const voices = availableVoices.length ? availableVoices : window.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(v => 
+                    v.name.includes('Google UK English Male') || 
+                    v.name.includes('Natural') || 
+                    (v.lang.includes('en-GB') && v.name.includes('Male')) ||
+                    v.name.includes('Daniel')
+                ) || voices.find(v => v.lang.includes('en-GB')) || voices[0];
+
+                if (preferredVoice) utterance.voice = preferredVoice;
+                window.speechSynthesis.speak(utterance);
+            } catch (e) {}
+
+            const log = document.getElementById('log');
+            if (log) log.innerText = "JARVIS: " + text;
+        }
+
+        // Drag and Drop Logic
+        function handleDragStart(event) {
+            event.dataTransfer.setData("text/plain", event.target.id);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event, columnId) {
+            event.preventDefault();
+            const targetCol = document.getElementById(columnId);
+            targetCol.classList.remove('drag-over');
+            const cardId = event.dataTransfer.getData("text/plain");
+            const draggedCard = document.getElementById(cardId);
+            
+            if (draggedCard) {
+                targetCol.prepend(draggedCard);
+                speak("Reassigned telemetry node to " + (columnId.includes('left') ? 'left' : 'right') + " dock, Sir.");
+            }
+        }
+
+        async function processInput() {
+            const inputField = document.getElementById('userInput');
+            if (!inputField) return;
+            const query = inputField.value.trim();
+            if (!query) return;
+
+            inputField.value = '';
+            const qLower = query.toLowerCase();
+
+            // Clear layout
+            if (qLower.includes('clear') || qLower.includes('close')) {
+                document.getElementById('left-column').innerHTML = '';
+                document.getElementById('right-column').innerHTML = '';
+                speak("Clearing active HUD windows.");
+                return;
+            }
+
+            // Calendar command
+            if (qLower.includes('calendar') || qLower.includes('schedule')) {
+                showCalendar();
+                return;
+            }
+
+            // Determine Target Side (Left vs Right)
+            let side = 'right'; // default side
+            let searchTerm = query;
+
+            if (qLower.includes('on the left') || qLower.includes('on left')) {
+                side = 'left';
+                searchTerm = query.replace(/on the left|on left/gi, '').replace(/open|show|search/gi, '').trim();
+            } else if (qLower.includes('on the right') || qLower.includes('on right')) {
+                side = 'right';
+                searchTerm = query.replace(/on the right|on right/gi, '').replace(/open|show|search/gi, '').trim();
+            } else {
+                searchTerm = query.replace(/open|show|search/gi, '').trim();
+            }
+
+            speak("Accessing telemetry stream for " + searchTerm + ", Sir.");
+            await fetchAndRenderData(searchTerm, side);
+        }
+
+        function showCalendar() {
+            const targetCol = document.getElementById('left-column');
+            
+            const panel = document.createElement('div');
+            panel.className = 'hud-panel';
+            panel.innerHTML = `
+                <h3>FAMILY CALENDAR</h3>
+                <p style="margin-bottom:10px; color:#7df9ff;">[Calendar Uplink Ready - Paste Google Calendar embed URL when available]</p>
+                <div class="calendar-frame" style="display:flex; align-items:center; justify-content:center;">
+                    <span style="opacity:0.6;">📅 CALENDAR PLACEHOLDER</span>
+                </div>
+            `;
+            
+            targetCol.prepend(panel);
+            speak("Displaying family calendar on your main dock, Sir.");
+        }
+
+        async function fetchAndRenderData(term, side) {
+            const targetCol = document.getElementById(side + '-column');
+            
+            const newPanel = document.createElement('div');
+            newPanel.className = 'hud-panel';
+            newPanel.innerHTML = '<h3>SEARCHING: ' + term.toUpperCase() + '</h3><p>Connecting to global satellite feeds...</p>';
+            targetCol.prepend(newPanel);
+
+            const qLower = term.toLowerCase();
+
+            // 1. ESPN Football Sports Feed
+            if (qLower.includes('nfl') || qLower.includes('football') || qLower.includes('sports') || qLower.includes('espn')) {
+                try {
+                    const espnRes = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/news');
+                    if (espnRes.ok) {
+                        const espnData = await espnRes.json();
+                        if (espnData.articles && espnData.articles.length > 0) {
+                            renderArticles(newPanel, "NFL TELEMETRY (" + term.toUpperCase() + ")", espnData.articles.slice(0, 4).map(a => ({
+                                title: a.headline,
+                                desc: a.description || 'Live coverage update from ESPN.',
+                                link: (a.links && a.links.web) ? a.links.web.href : '#'
+                            })));
+                            speak("NFL telemetry updated with 4 data nodes, Sir.");
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // 2. Wikipedia Multi-Article Search API
+            try {
+                const searchRes = await fetch('https://en.wikipedia.org/w/api.php?action=opensearch&search=' + encodeURIComponent(term) + '&limit=4&namespace=0&format=json&origin=*');
+                if (searchRes.ok) {
+                    const searchData = await searchRes.json();
+                    const titles = searchData[1];
+                    const links = searchData[3];
+
+                    if (titles && titles.length > 0) {
+                        const articles = [];
+                        
+                        for (let i = 0; i < titles.length; i++) {
+                            try {
+                                const summaryRes = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(titles[i]));
+                                if (summaryRes.ok) {
+                                    const summaryData = await summaryRes.json();
+                                    articles.push({
+                                        title: summaryData.title,
+                                        desc: summaryData.extract ? (summaryData.extract.length > 120 ? summaryData.extract.substring(0, 120) + '...' : summaryData.extract) : 'No detail extract available.',
+                                        link: links[i] || '#'
+                                    });
+                                }
+                            } catch (err) {}
+                        }
+
+                        if (articles.length > 0) {
+                            renderArticles(newPanel, "TELEMETRY: " + term.toUpperCase(), articles);
+                            speak("Retrieved " + articles.length + " telemetry feeds for " + term + ", Sir.");
+                            return;
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // 3. Fallback
+            newPanel.innerHTML = 
+                '<h3>TELEMETRY: ' + term.toUpperCase() + '</h3>' +
+                '<p>• Query Processed: "' + term + '"</p>' +
+                '<p>• Analysis complete. Opening web search link...</p>' +
+                '<br><a href="https://www.google.com/search?q=' + encodeURIComponent(term) + '" target="_blank" style="color:#00f0ff; font-weight:bold;">LAUNCH WEB SEARCH ➔</a>';
+            
+            speak("Telemetry analyzed for " + term + ", Sir.");
+        }
+
+        function renderArticles(container, title, items) {
+            let html = '<h3>' + title + '</h3>';
+            items.forEach((item, index) => {
+                const cardId = 'card-' + Date.now() + '-' + index;
+                html += '<div class="news-card" id="' + cardId + '" draggable="true" ondragstart="handleDragStart(event)">' +
+                            '<strong>' + item.title + '</strong>' +
+                            '<p>' + item.desc + '</p>' +
+                            '<a href="' + item.link + '" target="_blank">READ ARTICLE ➔</a>' +
+                        '</div>';
+            });
+            container.innerHTML = html;
+        }
+
+        function startVoice() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Speech recognition is not supported in this browser.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            const log = document.getElementById('log');
+            if (log) log.innerText = "SYSTEM: Listening...";
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('userInput').value = transcript;
+                processInput();
+            };
+
+            recognition.onerror = () => {
+                speak("I didn't catch that, Sir.");
+            };
+        }
+    </script>
+</body>
+</html>
