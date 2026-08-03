@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>J.A.R.V.I.S. Core Interface v6.0</title>
+    <title>J.A.R.V.I.S. Dynamic HUD Interface v7.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -24,7 +24,7 @@
             flex-direction: column;
         }
 
-        /* CRT Overlay Effect */
+        /* CRT Overlay Scanlines */
         body::before {
             content: " ";
             position: absolute;
@@ -68,7 +68,7 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* HUD Container */
+        /* Main HUD Window */
         #hud-container {
             flex: 1;
             width: 100vw;
@@ -102,7 +102,7 @@
         .workspace {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 240px 1fr;
+            grid-template-columns: 1fr 220px 1fr;
             gap: 12px;
             position: relative;
             align-items: stretch;
@@ -127,7 +127,7 @@
             border: 1px solid #00f0ff;
         }
 
-        /* Movable HUD Panels */
+        /* Movable HUD Panels & Generated Responses */
         .hud-panel {
             background: rgba(0, 240, 255, 0.08);
             border: 1px solid #00f0ff;
@@ -159,7 +159,6 @@
             align-items: center;
         }
 
-        /* Movement Control Buttons */
         .panel-controls {
             display: flex;
             gap: 4px;
@@ -182,7 +181,7 @@
             color: #000;
         }
 
-        /* CENTER HUD LOGO (EXACT IMAGE RECREATION) */
+        /* CENTER ANIMATED LOGO */
         .hud-center-container {
             display: flex;
             justify-content: center;
@@ -192,27 +191,27 @@
         }
 
         .hud-logo-svg {
-            width: 210px;
-            height: 210px;
-            filter: drop-shadow(0 0 10px #00f0ff);
+            width: 200px;
+            height: 200px;
+            filter: drop-shadow(0 0 12px #00f0ff);
         }
 
         .svg-rotate-cw {
             transform-origin: center;
-            animation: spin 30s linear infinite;
+            animation: spin 25s linear infinite;
         }
 
         .svg-rotate-ccw {
             transform-origin: center;
-            animation: spin-reverse 20s linear infinite;
+            animation: spin-reverse 18s linear infinite;
         }
 
-        .svg-pulse-hex {
+        .svg-pulse-core {
             transform-origin: center;
-            animation: pulse-scale 3s ease-in-out infinite;
+            animation: pulse-scale 2.5s ease-in-out infinite;
         }
 
-        /* Calendar Widget Styling */
+        /* Calendar Styling */
         .calendar-input-group {
             display: flex;
             gap: 6px;
@@ -244,7 +243,7 @@
             margin-left: 6px;
         }
 
-        /* Instructions & Terminal Area */
+        /* Terminal Area */
         .terminal-area {
             display: flex;
             flex-direction: column;
@@ -300,7 +299,7 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
-        @keyframes pulse-scale { 0%, 100% { transform: scale(0.96); opacity: 0.8; } 50% { transform: scale(1.04); opacity: 1; } }
+        @keyframes pulse-scale { 0%, 100% { transform: scale(0.95); opacity: 0.85; } 50% { transform: scale(1.05); opacity: 1; } }
         @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
     </style>
 </head>
@@ -308,7 +307,7 @@
 
     <div id="loader">
         <div class="loader-ring"></div>
-        <div class="loader-text">INITIALIZING STARK HUD v6.0...</div>
+        <div class="loader-text">INITIALIZING JARVIS HUD v7.0...</div>
     </div>
 
     <div id="hud-container">
@@ -322,15 +321,14 @@
                 
                 <div class="hud-panel" id="panel-status" draggable="true" ondragstart="handleDragStart(event)">
                     <h3>
-                        <span>SYSTEM DIAGNOSTICS</span>
+                        <span>SYSTEM STATUS</span>
                         <div class="panel-controls">
                             <button class="move-btn" onclick="movePanel('panel-status', 'right-column')">Move Right ➔</button>
                         </div>
                     </h3>
-                    <p>• Core Engine: Active</p>
-                    <p>• Interface Mode: Dynamic Docking</p>
-                    <p>• Voice Module: Deep British Male</p>
-                    <p>• Builder Assistant: Ready</p>
+                    <p>• Core Engine: Online</p>
+                    <p>• Response Docking: Active</p>
+                    <p>• Drag & Button Relocation: Enabled</p>
                 </div>
 
                 <div class="hud-panel" id="panel-calendar" draggable="true" ondragstart="handleDragStart(event)">
@@ -341,11 +339,11 @@
                         </div>
                     </h3>
                     <div class="calendar-input-group">
-                        <input type="text" id="eventInput" placeholder="New entry (e.g., Build Desk @ 3PM)...">
+                        <input type="text" id="eventInput" placeholder="Add event (e.g. Build PC @ 4PM)...">
                         <button class="action-btn" style="padding: 4px 8px; font-size:0.75rem;" onclick="addCalendarEvent()">+ ADD</button>
                     </div>
                     <ul class="calendar-list" id="calendarList">
-                        <li><span>• Initialized Jarvis HUD system</span><span class="delete-event" onclick="removeEvent(this)">✕</span></li>
+                        <li><span>• Initialized Jarvis HUD</span><span class="delete-event" onclick="removeEvent(this)">✕</span></li>
                     </ul>
                 </div>
 
@@ -353,38 +351,32 @@
 
             <div class="hud-center-container">
                 <svg class="hud-logo-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M 30,50 L 30,30 L 50,30" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
-                    <path d="M 170,50 L 170,30 L 150,30" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
-                    <path d="M 30,150 L 30,170 L 50,170" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
-                    <path d="M 170,150 L 170,170 L 150,170" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.7"/>
+                    <path d="M 25,45 L 25,25 L 45,25" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8"/>
+                    <path d="M 175,45 L 175,25 L 155,25" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8"/>
+                    <path d="M 25,155 L 25,175 L 45,175" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8"/>
+                    <path d="M 175,155 L 175,175 L 155,175" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8"/>
 
                     <g class="svg-rotate-cw">
-                        <circle cx="100" cy="100" r="75" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="4, 12, 20, 8" fill="none" opacity="0.8"/>
-                        <circle cx="100" cy="100" r="82" stroke="#00f0ff" stroke-width="2" stroke-dasharray="2, 40" fill="none"/>
+                        <circle cx="100" cy="100" r="78" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="6, 14, 28, 10" fill="none" opacity="0.85"/>
+                        <circle cx="100" cy="100" r="85" stroke="#00f0ff" stroke-width="2" stroke-dasharray="2, 38" fill="none"/>
                     </g>
 
                     <g class="svg-rotate-ccw">
-                        <circle cx="100" cy="100" r="62" stroke="#00f0ff" stroke-width="2" stroke-dasharray="15, 8, 4, 8" fill="none" opacity="0.9"/>
-                        <circle cx="100" cy="100" r="54" stroke="#00f0ff" stroke-width="1" stroke-dasharray="2, 6" fill="none" opacity="0.5"/>
+                        <circle cx="100" cy="100" r="64" stroke="#00f0ff" stroke-width="2" stroke-dasharray="18, 10, 4, 10" fill="none"/>
+                        <circle cx="100" cy="100" r="56" stroke="#00f0ff" stroke-width="1" stroke-dasharray="3, 8" fill="none" opacity="0.6"/>
                     </g>
 
-                    <circle cx="100" cy="20" r="2" fill="#00f0ff"/>
-                    <circle cx="100" cy="180" r="2" fill="#00f0ff"/>
-                    <circle cx="20" cy="100" r="2" fill="#00f0ff"/>
-                    <circle cx="180" cy="100" r="2" fill="#00f0ff"/>
-
-                    <g class="svg-pulse-hex">
-                        <polygon points="100,60 135,80 135,120 100,140 65,120 65,80" fill="rgba(0, 80, 255, 0.45)" stroke="#00f0ff" stroke-width="2.5"/>
-                        <polygon points="100,68 128,84 128,116 100,132 72,116 72,84" fill="none" stroke="rgba(0, 240, 255, 0.6)" stroke-width="1"/>
-                        <line x1="100" y1="92" x2="100" y2="108" stroke="#00f0ff" stroke-width="1.5"/>
-                        <line x1="92" y1="100" x2="108" y2="100" stroke="#00f0ff" stroke-width="1.5"/>
-                        <circle cx="100" cy="100" r="2" fill="#ffffff"/>
+                    <g class="svg-pulse-core">
+                        <polygon points="100,60 135,80 135,120 100,140 65,120 65,80" fill="rgba(0, 160, 255, 0.4)" stroke="#00f0ff" stroke-width="2.5"/>
+                        <polygon points="100,68 126,83 126,117 100,132 74,117 74,83" fill="none" stroke="rgba(0, 240, 255, 0.7)" stroke-width="1"/>
+                        <line x1="100" y1="90" x2="100" y2="110" stroke="#00f0ff" stroke-width="1.5"/>
+                        <line x1="90" y1="100" x2="110" y2="100" stroke="#00f0ff" stroke-width="1.5"/>
+                        <circle cx="100" cy="100" r="3" fill="#ffffff"/>
                     </g>
                 </svg>
             </div>
 
             <div id="right-column" class="side-column" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'right-column')">
-                
                 <div class="hud-panel" id="panel-builder" draggable="true" ondragstart="handleDragStart(event)">
                     <h3>
                         <span>BUILD ASSISTANT</span>
@@ -392,19 +384,17 @@
                             <button class="move-btn" onclick="movePanel('panel-builder', 'left-column')">⬅ Move Left</button>
                         </div>
                     </h3>
-                    <p style="color: #b0efff; margin-bottom: 6px;">Ask Jarvis to help build anything (e.g. <em>"build gaming pc"</em> or <em>"build bookshelf"</em>):</p>
-                    <div id="buildInstructions" style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px solid rgba(0,240,255,0.2);">
-                        <p>• Awaiting build request...</p>
+                    <div id="buildInstructions">
+                        <p>• Type any query below to generate a new movable panel.</p>
                     </div>
                 </div>
-
             </div>
         </div>
 
         <div class="terminal-area">
-            <div id="log" class="log-box">SYSTEM: Online and awaiting directives...</div>
+            <div id="log" class="log-box">SYSTEM: Online and awaiting commands...</div>
             <div class="controls">
-                <input type="text" id="userInput" placeholder="Type command (e.g. 'build PC', 'add event Meeting', 'move calendar right')..." onkeydown="if(event.key==='Enter') processInput()">
+                <input type="text" id="userInput" placeholder="Ask Jarvis (e.g. 'build gaming desk', 'show sports', 'add event meeting')..." onkeydown="if(event.key==='Enter') processInput()">
                 <button class="action-btn" onclick="processInput()">SEND</button>
                 <button class="action-btn" onclick="startVoice()">MIC</button>
             </div>
@@ -414,7 +404,6 @@
     <script>
         let availableVoices = [];
 
-        // Voice Synthesizer Initializer
         function loadVoices() {
             if ('speechSynthesis' in window) {
                 availableVoices = window.speechSynthesis.getVoices();
@@ -425,42 +414,35 @@
             loadVoices();
         }
 
-        // Hide Loader on Start
         setTimeout(() => {
             const loader = document.getElementById('loader');
             if (loader) {
                 loader.style.opacity = '0';
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    speak("System online and fully operational, Sir. How may I assist you today?");
+                    speak("System online. Every response can now be moved across docks, Sir.");
                 }, 500);
             }
         }, 1500);
 
-        // Clock Update
         setInterval(() => {
             const clock = document.getElementById('clock');
             if (clock) clock.innerText = new Date().toLocaleTimeString();
         }, 1000);
 
-        // Requirement 5: Deep British Male Voice
         function speak(text) {
             try {
                 if (!('speechSynthesis' in window)) return;
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 
-                // Deep pitch and natural speech timing
                 utterance.pitch = 0.70; 
                 utterance.rate = 0.92;
 
                 const voices = availableVoices.length ? availableVoices : window.speechSynthesis.getVoices();
-                
-                // Prioritize Deep British Male Voice profiles
                 const preferredVoice = voices.find(v => 
                     v.name.includes('Google UK English Male') || 
                     v.name.includes('George') ||
-                    v.name.includes('Oliver') ||
                     (v.lang.includes('en-GB') && v.name.toLowerCase().includes('male')) ||
                     v.name.includes('Daniel')
                 ) || voices.find(v => v.lang.includes('en-GB')) || voices[0];
@@ -473,25 +455,23 @@
             if (log) log.innerText = "JARVIS: " + text;
         }
 
-        // Requirement 1: Move panels left & right with buttons + drag support
+        // Relocates ANY Panel (Including Newly Generated AI Responses)
         function movePanel(panelId, targetColumnId) {
             const panel = document.getElementById(panelId);
             const targetCol = document.getElementById(targetColumnId);
             if (panel && targetCol) {
-                targetCol.appendChild(panel);
+                targetCol.prepend(panel);
                 const isLeft = targetColumnId.includes('left');
                 
-                // Update Button Label and Action
                 const btn = panel.querySelector('.move-btn');
                 if (btn) {
                     btn.innerText = isLeft ? 'Move Right ➔' : '⬅ Move Left';
                     btn.onclick = () => movePanel(panelId, isLeft ? 'right-column' : 'left-column');
                 }
-                speak(`Moved panel to the ${isLeft ? 'left' : 'right'} dock, Sir.`);
+                speak(`Moved response panel to ${isLeft ? 'left' : 'right'} side, Sir.`);
             }
         }
 
-        // Requirement 3: Add/Remove items from Calendar
         function addCalendarEvent(customText) {
             const input = document.getElementById('eventInput');
             const text = customText || (input ? input.value.trim() : '');
@@ -503,34 +483,41 @@
             list.appendChild(li);
 
             if (input && !customText) input.value = '';
-            speak(`Added ${text} to your calendar, Sir.`);
+            speak(`Added ${text} to calendar, Sir.`);
         }
 
         function removeEvent(element) {
             const item = element.parentElement;
             if (item) item.remove();
-            speak("Entry removed from calendar, Sir.");
+            speak("Calendar entry cleared.");
         }
 
-        // Requirement 4: Builder Assistant
-        function generateBuildPlan(item) {
-            const container = document.getElementById('buildInstructions');
-            const steps = [
-                `Phase 1: Design blueprints & assemble core components for ${item}.`,
-                `Phase 2: Secure structural framework and load essential dependencies.`,
-                `Phase 3: Connect power telemetry & configure control modules.`,
-                `Phase 4: Run initial diagnostic tests and verify system output.`
-            ];
+        // Dynamically creates MOVABLE response panels
+        function createResponsePanel(title, contentHtml, defaultSide = 'right-column') {
+            const panelId = 'panel-res-' + Date.now();
+            const panel = document.createElement('div');
+            panel.className = 'hud-panel';
+            panel.id = panelId;
+            panel.draggable = true;
+            panel.setAttribute('ondragstart', 'handleDragStart(event)');
 
-            container.innerHTML = `
-                <strong style="color:#ffffff;">Project Plan: ${item.toUpperCase()}</strong>
-                ${steps.map(s => `<p style="margin-top:6px; font-size:0.8rem;">${s}</p>`).join('')}
+            const isLeft = defaultSide.includes('left');
+
+            panel.innerHTML = `
+                <h3>
+                    <span>${title}</span>
+                    <div class="panel-controls">
+                        <button class="move-btn" onclick="movePanel('${panelId}', '${isLeft ? 'right-column' : 'left-column'}')">
+                            ${isLeft ? 'Move Right ➔' : '⬅ Move Left'}
+                        </button>
+                    </div>
+                </h3>
+                <div>${contentHtml}</div>
             `;
 
-            speak(`I have rendered the step-by-step construction plan for ${item}, Sir.`);
+            document.getElementById(defaultSide).prepend(panel);
         }
 
-        // Input Terminal Command Handler
         function processInput() {
             const inputField = document.getElementById('userInput');
             if (!inputField) return;
@@ -540,39 +527,38 @@
             inputField.value = '';
             const qLower = query.toLowerCase();
 
-            // Calendar commands
             if (qLower.startsWith('add event') || qLower.startsWith('add to calendar')) {
                 const eventText = query.replace(/add event|add to calendar/gi, '').trim();
                 addCalendarEvent(eventText);
                 return;
             }
 
-            // Build commands
+            // Create fully movable project response panel
             if (qLower.startsWith('build') || qLower.startsWith('how to make')) {
-                const item = query.replace(/build|how to make/gi, '').trim();
-                generateBuildPlan(item || 'your project');
+                const item = query.replace(/build|how to make/gi, '').trim() || 'Project';
+                const body = `
+                    <p style="margin-bottom:6px;"><strong>Step-by-Step Blueprint:</strong></p>
+                    <p>1. Gather parts and safety gear for ${item}.</p>
+                    <p>2. Assemble framework chassis and align connections.</p>
+                    <p>3. Initialize main logic unit and calibrate power flow.</p>
+                    <p>4. Run full systems test run.</p>
+                `;
+                createResponsePanel(`BUILD: ${item.toUpperCase()}`, body, 'right-column');
+                speak(`Generated movable project plan for ${item}, Sir.`);
                 return;
             }
 
-            // Layout movement commands
-            if (qLower.includes('move calendar right') || qLower.includes('calendar to right')) {
-                movePanel('panel-calendar', 'right-column');
-                return;
-            } else if (qLower.includes('move calendar left') || qLower.includes('calendar to left')) {
-                movePanel('panel-calendar', 'left-column');
-                return;
-            } else if (qLower.includes('move status right')) {
-                movePanel('panel-status', 'right-column');
-                return;
-            } else if (qLower.includes('move status left')) {
-                movePanel('panel-status', 'left-column');
-                return;
-            }
-
-            speak("Directive received. Processing telemetry for " + query + ", Sir.");
+            // Default AI generated response panel
+            const defaultResponse = `
+                <p>• Telemetry Query: "<em>${query}</em>"</p>
+                <p>• Data analyzed successfully.</p>
+                <p style="margin-top:6px;"><a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="color:#00f0ff;">Launch Full Web Uplink ➔</a></p>
+            `;
+            createResponsePanel(`TELEMETRY: ${query.toUpperCase()}`, defaultResponse, 'right-column');
+            speak(`Response panel created for ${query}. You can now drag or click to move it.`);
         }
 
-        // Drag and Drop Logic
+        // Drag & Drop Handlers
         function handleDragStart(event) {
             event.dataTransfer.setData("text/plain", event.currentTarget.id);
         }
@@ -592,18 +578,13 @@
             targetCol.classList.remove('drag-over');
             
             const panelId = event.dataTransfer.getData("text/plain");
-            const draggedPanel = document.getElementById(panelId);
-            
-            if (draggedPanel) {
-                movePanel(panelId, columnId);
-            }
+            if (panelId) movePanel(panelId, columnId);
         }
 
-        // Voice Input Functionality
         function startVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Speech recognition is not supported on this browser.");
+                alert("Voice synthesis is unavailable on this browser.");
                 return;
             }
 
@@ -611,16 +592,11 @@
             recognition.lang = 'en-US';
             recognition.start();
 
-            document.getElementById('log').innerText = "SYSTEM: Audio receiver online. Listening...";
+            document.getElementById('log').innerText = "SYSTEM: Speech recognition listening...";
 
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('userInput').value = transcript;
+                document.getElementById('userInput').value = event.results[0][0].transcript;
                 processInput();
-            };
-
-            recognition.onerror = () => {
-                speak("I didn't catch that, Sir. Please try again.");
             };
         }
     </script>
