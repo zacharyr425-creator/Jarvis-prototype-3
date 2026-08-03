@@ -127,8 +127,16 @@
             display: block;  
             font-size: 0.85rem;  
             line-height: 1.5;  
-            transition: all 0.3s ease;  
+            transition: transform 0.1s ease-out, opacity 0.3s ease;  
+            touch-action: none; 
+            cursor: grab;
+            position: relative;
+            z-index: 5;
         }  
+
+        .hud-panel:active {
+            cursor: grabbing;
+        }
 
         .hud-panel h3 {  
             font-family: 'Orbitron', sans-serif;  
@@ -460,6 +468,20 @@
             inputField.value = '';  
             const qLower = query.toLowerCase();  
 
+            // VOICE & SCREEN MOVEMENT COMMANDS
+            if (qLower.includes('move') || qLower.includes('shift') || qLower.includes('transfer') || qLower.includes('swap') || qLower.includes('switch')) {
+                if (qLower.includes('left')) {
+                    moveContent('left');
+                    return;
+                } else if (qLower.includes('right')) {
+                    moveContent('right');
+                    return;
+                } else if (qLower.includes('swap') || qLower.includes('switch')) {
+                    swapPanelContents();
+                    return;
+                }
+            }
+
             // 1. WRITING MODULE (Write essays, emails, stories, fantasy football draft tips, etc.)
             if (qLower.startsWith('write') || qLower.startsWith('draft') || qLower.startsWith('compose') || qLower.startsWith('create')) {
                 handleWritingRequest(query);
@@ -499,6 +521,42 @@
             // 5. ENCYCLOPEDIA / HISTORY SEARCH (Wikipedia / Britannica)
             await fetchKnowledge(query);
         }  
+
+        // Move Content Command Execution
+        function moveContent(direction) {
+            const rightTitle = document.getElementById('right-title').innerText;
+            const rightContent = document.getElementById('right-content').innerHTML;
+            const leftTitle = document.getElementById('left-title').innerText;
+            const leftContent = document.getElementById('left-content').innerHTML;
+
+            if (direction === 'left') {
+                document.getElementById('left-title').innerText = rightTitle;
+                document.getElementById('left-content').innerHTML = rightContent;
+                document.getElementById('right-title').innerText = "SYSTEM MONITOR";
+                document.getElementById('right-content').innerHTML = "<p>• Standing by for system telemetry...</p>";
+                speak("Moving active screen data to the left display panel, Sir.");
+            } else if (direction === 'right') {
+                document.getElementById('right-title').innerText = leftTitle;
+                document.getElementById('right-content').innerHTML = leftContent;
+                document.getElementById('left-title').innerText = "SYSTEM MONITOR";
+                document.getElementById('left-content').innerHTML = "<p>• Core Status: Online</p><p>• Live Data Networks: Active</p>";
+                speak("Moving active screen data to the right display panel, Sir.");
+            }
+        }
+
+        function swapPanelContents() {
+            const rightTitle = document.getElementById('right-title').innerText;
+            const rightContent = document.getElementById('right-content').innerHTML;
+            const leftTitle = document.getElementById('left-title').innerText;
+            const leftContent = document.getElementById('left-content').innerHTML;
+
+            document.getElementById('left-title').innerText = rightTitle;
+            document.getElementById('left-content').innerHTML = rightContent;
+            document.getElementById('right-title').innerText = leftTitle;
+            document.getElementById('right-content').innerHTML = leftContent;
+
+            speak("Swapping HUD display channels, Sir.");
+        }
 
         // AI Writing Assistant Handler
         function handleWritingRequest(prompt) {
@@ -639,6 +697,42 @@
                 speak("I didn't catch that, Sir.");  
             };  
         }  
+
+        // TOUCH & MOUSE DRAG ENGINE FOR PANELS
+        function makeDraggable(element) {
+            let posX = 0, posY = 0, initialX = 0, initialY = 0;
+
+            element.addEventListener('pointerdown', dragStart);
+
+            function dragStart(e) {
+                // Prevent dragging when selecting input or text content inside panel
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                
+                e.preventDefault();
+                initialX = e.clientX - posX;
+                initialY = e.clientY - posY;
+
+                document.addEventListener('pointermove', drag);
+                document.addEventListener('pointerup', dragEnd);
+            }
+
+            function drag(e) {
+                posX = e.clientX - initialX;
+                posY = e.clientY - initialY;
+                element.style.transform = `translate3d(${posX}px, ${posY}px, 0)`;
+            }
+
+            function dragEnd() {
+                document.removeEventListener('pointermove', drag);
+                document.removeEventListener('pointerup', dragEnd);
+            }
+        }
+
+        // Apply drag engine to both panels
+        window.addEventListener('DOMContentLoaded', () => {
+            makeDraggable(document.getElementById('left-panel'));
+            makeDraggable(document.getElementById('right-panel'));
+        });
     </script>  
 </body>  
 </html>
