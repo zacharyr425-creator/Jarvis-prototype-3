@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>J.A.R.V.I.S. Core Interface v8.0</title>
+    <title>J.A.R.V.I.S. AI Core Interface v10.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -24,7 +24,7 @@
             flex-direction: column;
         }
 
-        /* Scanlines Overlay */
+        /* CRT Overlay Effect */
         body::before {
             content: " ";
             position: absolute;
@@ -36,7 +36,7 @@
             pointer-events: none;
         }
 
-        /* Startup Screen */
+        /* Startup Loader */
         #loader {
             position: fixed;
             inset: 0;
@@ -68,7 +68,7 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* Core HUD Shell */
+        /* Main HUD Container */
         #hud-container {
             flex: 1;
             width: 100vw;
@@ -80,7 +80,7 @@
             display: flex;
             flex-direction: column;
             padding: 12px;
-            gap: 12px;
+            gap: 10px;
         }
 
         header {
@@ -99,7 +99,7 @@
             text-shadow: 0 0 10px #00f0ff;
         }
 
-        /* Main Workspace Area */
+        /* Workspace Grid - Responsive for Desktop & Mobile */
         .workspace {
             flex: 1;
             display: grid;
@@ -110,16 +110,28 @@
             overflow: hidden;
         }
 
+        @media (max-width: 768px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr 1fr;
+                overflow-y: auto;
+            }
+            .hud-logo-svg {
+                width: 220px !important;
+                height: 220px !important;
+            }
+        }
+
         .panel-container {
             display: flex;
             flex-direction: column;
             gap: 12px;
             overflow-y: auto;
             height: 100%;
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
             background: rgba(0, 240, 255, 0.01);
-            transition: background 0.2s, border 0.2s;
+            transition: background 0.2s;
         }
 
         .panel-container.drag-over {
@@ -127,7 +139,7 @@
             outline: 1px dashed #00f0ff;
         }
 
-        /* Movable HUD Panels */
+        /* Dynamic Response Panels */
         .hud-panel {
             background: rgba(0, 240, 255, 0.08);
             border: 1px solid #00f0ff;
@@ -181,7 +193,7 @@
             color: #000;
         }
 
-        /* ENLARGED CENTER LOGO */
+        /* Large Central Animated Logo */
         .hud-center-container {
             display: flex;
             justify-content: center;
@@ -210,7 +222,28 @@
             animation: pulse-scale 2.5s ease-in-out infinite;
         }
 
-        /* Input Console Area */
+        /* News & Query Formatting */
+        .telemetry-item {
+            border-left: 2px solid #00f0ff;
+            padding-left: 8px;
+            margin-bottom: 8px;
+            background: rgba(0, 240, 255, 0.04);
+            padding: 6px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .telemetry-item a {
+            color: #7df9ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .telemetry-item a:hover {
+            text-decoration: underline;
+            color: #ffffff;
+        }
+
+        /* Command Input Console */
         .terminal-area {
             display: flex;
             flex-direction: column;
@@ -274,12 +307,12 @@
 
     <div id="loader">
         <div class="loader-ring"></div>
-        <div class="loader-text">INITIALIZING JARVIS HUD v8.0...</div>
+        <div class="loader-text">INITIALIZING JARVIS AI CORE v10.0...</div>
     </div>
 
     <div id="hud-container">
         <header>
-            <div class="system-title">J.A.R.V.I.S.</div>
+            <div class="system-title">J.A.R.V.I.S. AI CORE</div>
             <div id="clock">00:00:00</div>
         </header>
 
@@ -319,9 +352,9 @@
         </div>
 
         <div class="terminal-area">
-            <div id="log" class="log-box">SYSTEM: Interface ready. Enter query below...</div>
+            <div id="log" class="log-box">SYSTEM: J.A.R.V.I.S. AI Engine online. Ask me anything...</div>
             <div class="controls">
-                <input type="text" id="userInput" placeholder="Type prompt (e.g. 'build gaming pc', 'system report')..." onkeydown="if(event.key==='Enter') processInput()">
+                <input type="text" id="userInput" placeholder="Ask J.A.R.V.I.S. anything (e.g. 'explain quantum physics', 'math 15 * 84', 'news on NBA')..." onkeydown="if(event.key==='Enter') processInput()">
                 <button class="action-btn" onclick="processInput()">SEND</button>
                 <button class="action-btn" onclick="startVoice()">MIC</button>
             </div>
@@ -347,7 +380,7 @@
                 loader.style.opacity = '0';
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    speak("System fully operational, Sir. Side docks removed and logo enlarged.");
+                    speak("J.A.R.V.I.S. multi-domain AI engine active, Sir. How may I assist you today?");
                 }, 500);
             }
         }, 1200);
@@ -382,7 +415,7 @@
             if (log) log.innerText = "JARVIS: " + text;
         }
 
-        // Moves response panel between left and right zones
+        // Relocates panels between Left & Right zones
         function movePanel(panelId, targetZoneId) {
             const panel = document.getElementById(panelId);
             const targetZone = document.getElementById(targetZoneId);
@@ -395,11 +428,11 @@
                     btn.innerText = isLeft ? 'Move Right ➔' : '⬅ Move Left';
                     btn.onclick = () => movePanel(panelId, isLeft ? 'right-zone' : 'left-zone');
                 }
-                speak(`Relocated panel to ${isLeft ? 'left' : 'right'} side, Sir.`);
+                speak(`Relocated panel to ${isLeft ? 'left' : 'right'} zone.`);
             }
         }
 
-        // Dynamically creates movable HUD panels
+        // Dynamic Panel Creator
         function createResponsePanel(title, contentHtml, defaultZone = 'right-zone') {
             const panelId = 'panel-' + Date.now();
             const panel = document.createElement('div');
@@ -425,6 +458,7 @@
             document.getElementById(defaultZone).prepend(panel);
         }
 
+        // UNIVERSAL AI INTELLIGENCE ENGINE
         function processInput() {
             const inputField = document.getElementById('userInput');
             if (!inputField) return;
@@ -434,30 +468,70 @@
             inputField.value = '';
             const qLower = query.toLowerCase();
 
-            if (qLower.startsWith('build') || qLower.startsWith('how to make')) {
-                const item = query.replace(/build|how to make/gi, '').trim() || 'Project';
-                const body = `
-                    <p style="margin-bottom:6px;"><strong>Blueprint Sequence:</strong></p>
-                    <p>1. Gather essential materials for ${item}.</p>
-                    <p>2. Assemble structural housing.</p>
-                    <p>3. Calibrate core systems and connectivity.</p>
-                    <p>4. Execute operational tests.</p>
+            // 1. MATH / CALCULATION INTENT
+            if (/^[\d\s\+\-\*\/\(\)\.\^]+$/.test(query) || qLower.startsWith('calculate') || qLower.startsWith('math')) {
+                try {
+                    const mathExpr = query.replace(/calculate|math/gi, '').trim();
+                    const result = eval(mathExpr);
+                    const body = `<p>• Expression: <strong>${mathExpr}</strong></p><p style="margin-top:6px; font-size:1.1rem; color:#ffffff;">• Result: <strong>${result}</strong></p>`;
+                    createResponsePanel('MATH COMPUTATION', body, 'right-zone');
+                    speak(`The result of ${mathExpr} is ${result}, Sir.`);
+                    return;
+                } catch (e) {}
+            }
+
+            // 2. UNIVERSAL NEWS & SPORTS INTENT (ANY SPORT OR TOPIC)
+            if (qLower.includes('news') || qLower.includes('scores') || qLower.includes('weather') || qLower.includes('stocks') || qLower.includes('nfl') || qLower.includes('nba') || qLower.includes('mlb')) {
+                const topic = query.replace(/news on|news about|news|scores|weather|stocks/gi, '').trim().toUpperCase() || 'GENERAL TELEMETRY';
+                const newsHtml = `
+                    <div class="telemetry-item">
+                        <a href="https://news.google.com/search?q=${encodeURIComponent(topic)}" target="_blank">
+                            • Live ${topic} News & Headlines ➔
+                        </a>
+                        <p style="font-size:0.75rem; color:#a0d8ef;">Satellite telemetry feed linked.</p>
+                    </div>
+                    <div class="telemetry-item">
+                        <a href="https://www.google.com/search?q=${encodeURIComponent(topic)}" target="_blank">
+                            • Deep Web Search Results for ${topic} ➔
+                        </a>
+                        <p style="font-size:0.75rem; color:#a0d8ef;">Direct web proxy ready for instant analysis.</p>
+                    </div>
                 `;
-                createResponsePanel(`BUILD: ${item.toUpperCase()}`, body, 'right-zone');
-                speak(`Generated movable blueprint for ${item}, Sir.`);
+                createResponsePanel(`INTELLIGENCE FEED: ${topic}`, newsHtml, 'right-zone');
+                speak(`Retrieved real-time intelligence telemetry for ${topic}, Sir.`);
                 return;
             }
 
-            const responseText = `
-                <p>• Input Directive: "<em>${query}</em>"</p>
-                <p>• Data processed and rendered.</p>
-                <p style="margin-top:6px;"><a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="color:#00f0ff;">Open Search Telemetry ➔</a></p>
+            // 3. BLUEPRINT / CREATION INTENT
+            if (qLower.startsWith('build') || qLower.startsWith('how to make') || qLower.startsWith('create') || qLower.startsWith('code')) {
+                const item = query.replace(/build|how to make|create|code/gi, '').trim() || 'Project';
+                const body = `
+                    <p style="margin-bottom:6px;"><strong>Architectural Sequence:</strong></p>
+                    <p>1. Analyze schematics and dependencies for ${item}.</p>
+                    <p>2. Construct fundamental logic & framework layer.</p>
+                    <p>3. Calibrate telemetry feeds and user interface controls.</p>
+                    <p>4. Execute diagnostic verification suite.</p>
+                `;
+                createResponsePanel(`BLUEPRINT: ${item.toUpperCase()}`, body, 'right-zone');
+                speak(`Generated architectural step-by-step plan for ${item}, Sir.`);
+                return;
+            }
+
+            // 4. GENERAL KNOWLEDGE / AI QUERY
+            const generalAiResponse = `
+                <p><strong>Query Analysis:</strong> "<em>${query}</em>"</p>
+                <p style="margin-top:6px;">Processing high-level reasoning modules across central databanks...</p>
+                <div class="telemetry-item" style="margin-top:10px;">
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank">
+                        • Access Full Global Data Network on "${query}" ➔
+                    </a>
+                </div>
             `;
-            createResponsePanel(`RESPONSE: ${query.toUpperCase()}`, responseText, 'right-zone');
-            speak(`Response panel created for ${query}, Sir.`);
+            createResponsePanel(`ANALYSIS: ${query.toUpperCase()}`, generalAiResponse, 'right-zone');
+            speak(`I have processed your query for ${query}, Sir.`);
         }
 
-        // Drag & Drop Handling
+        // Drag & Drop
         function handleDragStart(event) {
             event.dataTransfer.setData("text/plain", event.currentTarget.id);
         }
@@ -483,7 +557,7 @@
         function startVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Voice synthesis is unavailable on this browser.");
+                alert("Voice recognition is unavailable on this device.");
                 return;
             }
 
@@ -491,7 +565,7 @@
             recognition.lang = 'en-US';
             recognition.start();
 
-            document.getElementById('log').innerText = "SYSTEM: Speech recognition listening...";
+            document.getElementById('log').innerText = "SYSTEM: Voice interface listening...";
 
             recognition.onresult = (event) => {
                 document.getElementById('userInput').value = event.results[0][0].transcript;
